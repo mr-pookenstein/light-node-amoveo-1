@@ -105,7 +105,7 @@ function channels_main() {
     document.body.appendChild(channels_div);
 
     //xyz
-    append_children(channels_div, [channel_warning_div, load_button, br(),channel_sync_button2, br(), br(), save_name, save_button, local_channel_upload, local_channel_download, br(),  br()]);
+    append_children(channels_div, [channel_warning_div, load_button, br(),channel_sync_button2, br(), br(), save_name, save_button, br(),  br()]);
     document.body.appendChild(channel_interface_div);
 
     //main_view();
