@@ -14,11 +14,11 @@ First time users:
 4. in the stablecoin market, fill out the fields with a veo/btc price, an amount of veo, and click long or short. short means you want a stablecoin, long means you want to go long veobtc. hit "Place order".
 5. you can click "check positions" to see if your order has been filled yet. "check balance" checks your channel balance.
               
-              An order to short 0.045 VEO at 0.025 veobtc that has been filled looks like this:
-                    Value: -0.045 VEO, Entry Price: 0.025
+              An order to short 1 VEO at 0.025 veobtc that has been filled looks like this:
+                      ACTIVE ORDER - Remaining: -1 VEO, Order Price: 0.025 
               
               If this same order wasn't filled, it would look like this:
-                    Value: -0.045 VEO, Order Price: 0.025
+                      POSITION - Value: -1 VEO, Entry Price: 0.025
 
 note: users should save their channel state before exiting the page by clicking "channel settings" at the top and downloading their channel state.
 
