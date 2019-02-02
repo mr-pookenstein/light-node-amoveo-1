@@ -105,7 +105,7 @@ function channels_main() {
     document.body.appendChild(channels_div);
 
     //xyz
-    append_children(channels_div, [channel_warning_div, load_button, br(),channel_sync_button2, br(), br(), save_name, save_button, br(),  br()]);
+    append_children(channels_div, [channel_warning_div, load_button, br(),channel_sync_button2, br(), br(), save_name, save_button, local_channel_upload, local_channel_download, br(),  br()]);
     document.body.appendChild(channel_interface_div);
 
     //main_view();
@@ -719,7 +719,9 @@ spk currently looks like this.
 	for (var i = 1; i < bets.length; i++) {
 	    //console.log("sum bets bet is ");
 	    //console.log(JSON.stringify(bets[i][2]));
-	    x += bets[i][2];
+	    x += (Number(bets[i][2]) * (Number(bets[i][4][2]) / Number(10000))) ;
+console.log("here are prices: " + (Number(bets[i][4][2]) / Number(10000)));
+
 	}
         return x;
     }
