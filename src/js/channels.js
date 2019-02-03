@@ -105,7 +105,7 @@ function channels_main() {
     document.body.appendChild(channels_div);
 
     //xyz
-    append_children(channels_div, [channel_warning_div, load_button, br(),channel_sync_button2, br(), br(), save_name, save_button, br(),  br()]);
+    append_children(channels_div, [channel_warning_div, load_button, br(),channel_sync_button2, br(), br(), save_name, save_button, local_channel_upload, local_channel_download, br(),  br()]);
     document.body.appendChild(channel_interface_div);
 
     //main_view();
@@ -122,9 +122,31 @@ function channels_main() {
 
 function populateStorage() {
 
-  localStorage.setItem('channelData', JSON.stringify(channel_manager));
+
+  //we need to make sure to try to minimize inadvertent overwrites by misclicks.
+  // simple solution is that if channel_data is null then dont let anyone upload.
+//NULLTESTING
+
+console.log("channel_data: " + JSON.stringify(channel_manager));
+console.log("channel_data is empty?: "  + ((JSON.stringify(channel_manager) == "{}" )));
+
+if (JSON.stringify(channel_manager) == "{}"){
+    console.log("channel data is empty, cancelling local storage upload to prevent inadvertent overwrite");
+} else{
+  localStorage.setItem(keys.pub() +'channelData',  JSON.stringify(channel_manager));
+  console.log("channel data loaded into local storage");
+  console.log("loaded as: "+ keys.pub() +"channelData");
 
 }
+
+
+
+
+
+
+}
+
+
 
     var price = document.createElement("INPUT");
     price.setAttribute("type", "text");
@@ -251,11 +273,57 @@ function populateStorage() {
       console.log("PUBKEY" + string_to_array(atob(keys.pub())));
       console.log("PUBKEY2" + keys.pub().replace(/"/g, ''));
 
+//load_channels_localLite
+
+        channel_manager = JSON.parse(localStorage.getItem(keys.pub() + 'channelData'));
+          console.log("NULLTESTING: " + (localStorage.getItem(keys.pub() + 'channelData') == null));
+
+          console.log("NULLTESTINGSTRINGIFY: " + (JSON.stringify(localStorage.getItem(keys.pub() + 'channelData')) == null));
+
+      if ((localStorage.getItem(keys.pub() + 'channelData') == null)) {
+                console.log("no channel data in local storage, aborting channel load");
+      }else{
+        variable_public_get(["pubkey"], function(pubkey) {
+            return refresh_channels_interfaces(pubkey);
+          })
+
+          variable_public_get(["pubkey"], function(pubkey) {
+            return refresh_balance(pubkey);
+
+              bets_object.main;
+            })
+
+            stablecoin_UI();
 
 
-        stablecoin_UI();
-        channel_manager = JSON.parse(localStorage.getItem('channelData'));
-        refresh_channels_interfaces(string_to_array(key.pub()));
+
+}
+
+        console.log("PUBKEY" + keys.pub());
+
+
+    }
+
+    function load_channels_localLite() {
+
+      console.log("PUBKEY" + string_to_array(atob(keys.pub())));
+      console.log("PUBKEY2" + keys.pub().replace(/"/g, ''));
+
+
+
+        channel_manager = JSON.parse(localStorage.getItem(keys.pub() + 'channelData'));
+          console.log("NULLTESTING: " + (localStorage.getItem(keys.pub() + 'channelData') == null));
+      if ((JSON.stringify(localStorage.getItem(keys.pub() + 'channelData')) == null)) {
+
+      }else{
+
+  //        variable_public_get(["pubkey"], function(pubkey) {
+  //          return refresh_balance(pubkey);
+  //          })
+
+    //        stablecoin_UI();
+}
+
         console.log("PUBKEY" + keys.pub());
 
 
@@ -565,6 +633,7 @@ function returnTrueFalse(_bool2) {
         write(server_pubkey, cd);
         trade_amount.value = "";
         channel_warning();
+        populateStorage();
     }
 
     //Controller
@@ -641,7 +710,9 @@ function returnTrueFalse(_bool2) {
         var cd = new_cd(spk, s2spk, [], [], expiration, cid);
         write(acc2, cd);
         channel_warning();
+        populateStorage();
         refresh_channels_interfaces(pubkey);
+
     }
 
 
@@ -792,13 +863,51 @@ spk currently looks like this.
 
 
 
-
     return {new_cd: new_cd,
             read: read,
             new_ss: new_ss,
             write: write,
-	    ss_to_external: ss_to_external}
+	    ss_to_external: ss_to_external,
+      loadchannelslocal_final: (function() { load_channels_local(); }),
+
+    loadchannelsreturn: (function() { load_channels_localLite(); }),
+  loadchannelsreturn2: (function() { refresh_channels_interfaces(pubkey); }),
+  loadchannelsreturn3: (function() { refresh_balance(pubkey); }),
+  popStorage: (function() { populateStorage(); })}
+
 }
 
 
 var channels_object = channels_main();
+
+
+function load_channels_localGlobal() {
+
+  console.log("PUBKEY" + string_to_array(atob(keys.pub())));
+  console.log("PUBKEY2" + keys.pub().replace(/"/g, ''));
+
+
+
+    channel_manager = JSON.parse(localStorage.getItem(keys.pub() + 'channelData'));
+      console.log("NULLTESTING: " + (JSON.stringify(localStorage.getItem(keys.pub() + 'channelData')) == null));
+
+
+  if ((JSON.stringify(localStorage.getItem(keys.pub() + 'channelData')) == null)) {
+
+  }else{
+    console.log("nulltesting pass");
+    variable_public_get(["pubkey"], function(pubkey) {
+        return channels_main.refresh_channels_interfaces(pubkey);
+      })
+
+      variable_public_get(["pubkey"], function(pubkey) {
+        return channels_main.refresh_balance(pubkey);
+        })
+
+        stablecoin_UI();
+}
+
+    console.log("PUBKEY" + keys.pub());
+
+
+}

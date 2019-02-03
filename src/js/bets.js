@@ -151,6 +151,7 @@ function directionize(_bool){
             console.log(ss);
             console.log("this trade has already been partially or fully matched. it cannot be canceled now.");
         }
+
     }
     function remove_bet(n, spk0) {
         var spk = JSON.parse(JSON.stringify(spk0));
@@ -193,6 +194,8 @@ function directionize(_bool){
         cd.ssme = remove_nth(n, cd.ssme);
         cd.ssthem = remove_nth(n, cd.ssthem);
         channels_object.write(server_pubkey, cd);
+
+        channels_object.popStorage();
         main();
     }
     function remove_nth(n, a) {

@@ -50,7 +50,7 @@ function keys_function1() {
     document.body.appendChild(div);
 
   //  append_children(div, [load_text, file_selector, br(), pub_div, br(), save_name, save_button, br(), watch_only_instructions, watch_only_pubkey, watch_only_button, br(), new_pubkey_button, new_pubkey_div, br(), bal_div, balance_button]);
-    append_children(div, [load_text, br(), br(), file_selector, br(), br(), pub_div, br(), bal_div, save_button, save_button2, balance_button]);
+    append_children(div, [load_text, br(), file_selector, pub_div, br(), bal_div, br(),save_button, save_button2, balance_button]);
 
     //update_pubkey();
     function input_maker(val) {
@@ -92,7 +92,7 @@ function keys_function1() {
 	}
     }
     function update_pubkey() {
-        pub_div.innerHTML = ("your pubkey ").concat(pubkey_64());
+        pub_div.innerHTML = ("Your pubkey: ").concat(pubkey_64());
     }
     function watch_only_func() {
 	var v = watch_only_pubkey.value;
@@ -140,11 +140,14 @@ function keys_function1() {
         merkle.request_proof("accounts", trie_key, function(x) {
             set_balance(x[1] / token_units());
         });
+
+        console.log("after updating balance, keys.js pubkey is: " + keys.pub());
+
     }
 
 
     function set_balance(n) {
-        bal_div.innerHTML = ("your balance ").concat((n).toString()) + " VEO";
+        bal_div.innerHTML = ("Your balance: ").concat((n).toString()) + " VEO";
         //document.getElementById("onchainbalance").innerHTML = "Wallet Balance: " + n + " VEO";
     }
     function save_keys() {
@@ -159,8 +162,41 @@ function keys_function1() {
             keys_internal = ec.keyFromPrivate(reader.result, "hex");
             update_pubkey();
             update_balance();
+            console.log("keys.js PUBKEY_64 is INTERNAL: " + pubkey_64());
+            console.log("keys.js keys.pub() is INTERNAL: " + keys.pub());
+
+
+
+      load_text.style.display = "initial";
+      file_selector.style.display = "intitial";
+
+
+      load_text.style.display = "block";
+      file_selector.style.display = "block";
+
+
+      load_text.style.display = "unset";
+      file_selector.style.display = "unset";
+
+
+            load_text.style.display = "none";
+            file_selector.style.display = "none";
+
+            return channels_object.loadchannelslocal_final(pubkey_64);
+
+      //      return channels_object.loadchannelsreturn2(pubkey_64);
+      //      stablecoin_UI();
+
+      //      return channels_object.loadchannelsreturn3(pubkey_64);
+
         }
         reader.readAsText(file);
+
+
+        console.log("keys.js pubkey is: " + keys.pub());
+        console.log("keys.js PUBKEY_64 is: " + pubkey_64());
+
+
     }
     function encrypt(val, to) {
         return encryption_object.send(val, to, keys_internal);
@@ -168,6 +204,6 @@ function keys_function1() {
     function decrypt(val) {
 	return encryption_object.get(val, keys_internal);
     }
-    return {make: new_keys, pub: pubkey_64, sign: sign_tx, ec: (function() { return ec; }), encrypt: encrypt, decrypt: decrypt, check_balance: check_balance};
+    return {make: new_keys, pub: pubkey_64, _bal: update_balance, sign: sign_tx, ec: (function() { return ec; }), encrypt: encrypt, decrypt: decrypt, check_balance: check_balance};
 }
 var keys = keys_function1();
