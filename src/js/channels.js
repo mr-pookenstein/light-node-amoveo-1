@@ -136,6 +136,9 @@ function populateStorage() {
     var marginrequirement = document.createElement("h8");
     marginrequirement.innerHTML = "Margin of safety: ";
 
+    var capitalconstraint = document.createElement("h8");
+    capitalconstraint.innerHTML = "Capital cost: ";
+
     var leverage = document.createElement("h8");
     leverage.innerHTML = "Leverage: ";
 
@@ -171,7 +174,7 @@ function populateStorage() {
     var lifespan_info = document.createElement("h8");
     lifespan_info.innerHTML = "how long should the channel last? In blocks. Longer costs more.";
     var balance_div = document.createElement("div");
-    balance_div.innerHTML = "your balance unknown";
+    balance_div.innerHTML = "waiting for channel transaction to be included in a block...";
     var channel_balance_button = button_maker2("Check balance", function() { });
     var market_title = document.createElement("h3");
     market_title.innerHTML = "Betting Interface";
@@ -184,6 +187,9 @@ function populateStorage() {
     var button = button_maker2("Place order", make_bet);
 
     var calcleverage = button_maker2("Calculate margin of safety", function() {});
+
+    var calccapitalconstraint = button_maker2("Calculate capital cost", function() {});
+
 
     var bet_update_button = button_maker2("check if any bets have been settled", function() {});
     var combine_cancel_button = button_maker2("combine bets in opposite directions to recover the money from the market ", function() {});
@@ -225,6 +231,8 @@ function populateStorage() {
         var file = (load_button.files)[0];
         var reader = new FileReader();
         reader.onload = function(e) {
+
+
             channel_manager = JSON.parse(reader.result);
 	    //console.log(JSON.stringify(channel_manager));
             refresh_channels_interfaces(pubkey);
@@ -238,11 +246,18 @@ function populateStorage() {
 
 
 
-    function load_channels_local(address) {
+    function load_channels_local() {
 
-        console.log("PUBKEY"+ variable_public_get(["account", address]));
+      console.log("PUBKEY" + string_to_array(atob(keys.pub())));
+      console.log("PUBKEY2" + keys.pub().replace(/"/g, ''));
+
+
+
+        stablecoin_UI();
         channel_manager = JSON.parse(localStorage.getItem('channelData'));
-        refresh_channels_interfaces(address);
+        refresh_channels_interfaces(string_to_array(key.pub()));
+        console.log("PUBKEY" + keys.pub());
+
 
     }
 
@@ -274,14 +289,29 @@ function goshort(){
 
 }
 
+function capconstraintfunc(){
+
+if (trade_type.value == "long"){
+  capitalconstraint.innerHTML = "Capital cost: You: "+ Number(trade_amount.value) + " VEO; Server: " + Number(trade_amount.value) /(( Number(price.value)) / Number(upperlimit))+ " VEO";
+} else {
+
+  if (trade_type.value == "short"){
+  capitalconstraint.innerHTML = "Capital cost: You: "+ Number(trade_amount.value) + " VEO; Server: " + Number(trade_amount.value) /((Number(upperlimit) - (Number(price.value))) / Number(upperlimit))+ " VEO";
+}
+}
+   //+ Number(trade_amount.value) * Number(price.value) / (Number(0.05) + Number(price.value);
+
+  //+ " VEO; Server: " + Number(trade_amount.value) /(Number(0.05) + Number(price.value))+ " VEO";
+
+}
 
 function calclev(){
 
 console.log(trade_amount.value);
 if (trade_type.value == "short"){
-    marginrequirement.innerHTML = "Margin of safety: BTC stablecoin is safe up to " + parseFloat(Number(100) * Number(price.value) / Number(upperlimit)).toFixed(2) + "% decline in VEOBTC price from your order price"; //.toFixed(2) ;
+    marginrequirement.innerHTML = "Margin of safety: BTC stablecoin is safe up to " + parseFloat(Number(100) * Number(price.value) / Number(upperlimit)).toFixed(2) + "% decline from your order price"; //.toFixed(2) ;
     }else{
-      marginrequirement.innerHTML = "Margin of safety: upside is capped to a " + parseFloat(Number(-100) + Number(100) * Number(upperlimit) / Number(price.value)).toFixed(2) + "% increase in VEOBTC price from your order price"; //.toFixed(2) ;
+      marginrequirement.innerHTML = "Margin of safety: upside is capped to a " + parseFloat(Number(-100) + Number(100) * Number(upperlimit) / Number(price.value)).toFixed(2) + "% increase from your order price"; //.toFixed(2) ;
 
 }
 }
@@ -323,7 +353,12 @@ function returnTrueFalse(_bool2) {
         //check if we have a chnnel with the server yet.
         //if we don't, then give an interface for making one.
         if (read(pubkey) == undefined) {
-            console.log("give interface for making channels.");
+
+            console.log(pubkey);
+
+
+            console.log("give interface for making channels UNDEFINED.");
+
             height_button.onclick = function() { return make_channel_func(pubkey) };
 
             cost_button.onclick = function() { return calculate_fee() };
@@ -338,11 +373,12 @@ function returnTrueFalse(_bool2) {
 
 
             calcleverage.onclick = function() { return calclev() };
+            calccapitalconstraint.onclick = function() { return capconstraintfunc() };
 
 
 //            append_children(div, [long_button,short_button, br(), price_info, price,br(),trade_type_info, trade_type, br(),trade_amount_info, trade_amount, br(), oid_info, oid, button, br(), bet_update_button, br(), br(), combine_cancel_button, br(), br(), list_bets_button, br(), bets_div,close_channel_button, br(), balance_div, channel_balance_button]);
 
-            append_children(div, [long_button,short_button,br(), br(),longshort_info, br(), br(), price_info, price, br(),trade_amount_info, trade_amount, br(), trade_type_info, trade_type, br(), marginrequirement, br(), br(), button, calcleverage, br(), br(), bets_div, br(), balance_div, br(), channel_balance_button,list_bets_button,br(),br(),close_channel_button]);
+            append_children(div, [long_button,short_button,br(), br(),longshort_info, br(), br(), price_info, price, br(),trade_amount_info, trade_amount, br(), trade_type_info, trade_type, br(), marginrequirement, br(),capitalconstraint, br(), button, calcleverage,calccapitalconstraint, br(), br(), bets_div, br(), balance_div, br(), channel_balance_button,list_bets_button,br(),br(),close_channel_button]);
 
             lightning_button.onclick = function() { lightning_spend(pubkey); };
             channel_balance_button.onclick = function() {refresh_balance(pubkey);};
@@ -616,6 +652,7 @@ function returnTrueFalse(_bool2) {
     }
     function refresh_balance(pubkey) {
         //console.log(channel_manager[pubkey]);
+        console.log("your pubkey: " + keys.pub());
 
     //    console.log("LOCALSTORAGE JSON:" + JSON.stringify(localStorage.getItem('channelData')));
         var cd = read(pubkey);
@@ -629,14 +666,17 @@ function returnTrueFalse(_bool2) {
             var spk = cd.them[1];
 	    var expiration = cd.expiration;
 	    var height = top_header[1];
-      console.log(spk);
+    //  console.log(spk);
             var amount = spk[7];
             var betAmount = sum_bets(spk[3]);
+            var serverAmount = sum_bets2(spk[3]);
 	    console.log(JSON.stringify([val[4], amount, betAmount, val[5], token_units()]));
-            var mybalance = ((val[4] - amount - betAmount)/ token_units()).toString();
-            var serverbalance = ((val[5] + amount) / token_units()).toString();
-            balance_div.innerHTML = ("Server balance: ").concat(
-                serverbalance).concat("").concat(", Your balance: ").concat(
+            var mybalance = ((val[4] - betAmount - (betAmount + amount))/ token_units()).toString();
+
+// the server amount is just subtracting mine,so we need to change
+            var serverbalance = ((val[5] - serverAmount + amount + betAmount) / token_units()).toString();
+            balance_div.innerHTML = ("Server capital: ").concat(
+                serverbalance).concat("").concat(", Your capital: ").concat(
                     mybalance);
                   //  .concat(" Time left in blocks: ").concat(cd.expiration - height).toString())
         });
@@ -716,15 +756,43 @@ spk currently looks like this.
     }
     function sum_bets(bets) {
 	var x = 0;
+
 	for (var i = 1; i < bets.length; i++) {
 	    //console.log("sum bets bet is ");
 	    //console.log(JSON.stringify(bets[i][2]));
-	    x += (Number(bets[i][2]) * (Number(bets[i][4][2]) / Number(10000))) ;
-console.log("here are prices: " + (Number(bets[i][4][2]) / Number(10000)));
-
-	}
+//	    x += ( (Number(bets[i][2])) * (Number(bets[i][4][2]) /(  Number(bets[i][4][2]) + Number(10000))  ) );
+//      x += (Number(bets[i][2])) * (Number(bets[i][4][2]) /(  Number(bets[i][4][2]) + Number(10000))  );
+        x += ( (Number(bets[i][2])) * (Number(bets[i][4][2]) /(  Number(bets[i][4][2]) + Number(10000))  ) );
+        console.log("here are prices: " + (Number(bets[i][4][2]) / Number(10000)));
+        console.log("here are the amounts: " + (Number(bets[i][2]) / Number(100000000)));
+        console.log("here is the multiplier: " + (Number(bets[i][4][2]) /(  Number(bets[i][4][2]) + Number(10000))  )    )
+        console.log("here is the subtraction amount: " + ( (Number(bets[i][2])) * (Number(bets[i][4][2]) /(  Number(bets[i][4][2]) + Number(10000))  ) ) )
+        console.log("cumulative amount is: " + x);
+}
         return x;
     }
+
+    function sum_bets2(bets) {
+  var x = 0;
+
+  for (var i = 1; i < bets.length; i++) {
+      //console.log("sum bets bet is ");
+      //console.log(JSON.stringify(bets[i][2]));
+//	    x += ( (Number(bets[i][2])) * (Number(bets[i][4][2]) /(  Number(bets[i][4][2]) + Number(10000))  ) );
+//      x += (Number(bets[i][2])) * (Number(bets[i][4][2]) /(  Number(bets[i][4][2]) + Number(10000))  );
+        x += (( (Number(bets[i][2])) * (Number(bets[i][4][2]) /(  Number(bets[i][4][2]) + Number(10000))  ) ) / (Number(bets[i][4][2]) / Number(10000)));
+        console.log("here are prices: " + (Number(bets[i][4][2]) / Number(10000)));
+        console.log("here are the amounts: " + (Number(bets[i][2]) / Number(100000000)));
+        console.log("here is the multiplier: " + (Number(bets[i][4][2]) /(  Number(bets[i][4][2]) + Number(10000))  )    )
+        console.log("here is the subtraction amount: " + ( (Number(bets[i][2])) * (Number(bets[i][4][2]) /(  Number(bets[i][4][2]) + Number(10000))  ) ) )
+        console.log("cumulative amount is: " + x);
+}
+        return x;
+    }
+
+
+
+
     return {new_cd: new_cd,
             read: read,
             new_ss: new_ss,

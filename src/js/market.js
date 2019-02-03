@@ -101,13 +101,20 @@ function market_trade(cd, amount, price, bet, oid) { //oid unused
     var space_limit = 100000;
     var cGran = 10000;
     var a = Math.floor((amount * price) / cGran);
+
+    console.log("MARKET TRADE AMOUNT:" + amount);
+    console.log("MARKET TRADE PRICE:" + price);
+    console.log("MARKET TRADE cGran:" + cGran);
+
     market_spk[3][0] = bet;
     market_spk[3] = ([-6]).concat(market_spk[3]);//add new bet to front
     market_spk[8] = market_spk[8] + 1; //nonce
     market_spk[5] = market_spk[5] + time_limit;// time_gas/10
     market_spk[4] = Math.max(market_spk[4], space_limit); //space_gas
     market_spk[7] = market_spk[7] - a; //amount
+    console.log("market spk 7 AFTER: " + market_spk[7]);
     console.log("market trade spk after ");
+    console.log("");
     console.log(JSON.stringify(market_spk));
     return market_spk;
 }
