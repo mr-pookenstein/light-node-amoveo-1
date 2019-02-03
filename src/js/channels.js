@@ -86,6 +86,7 @@ function channels_main() {
 
 
     var channel_sync_button2 = button_maker2("Trusted channel sync", function(){
+        channel_manager = {};
 
         variable_public_get(["pubkey"], function(pubkey) {
             spk_object.pull_channel_state(function() {
