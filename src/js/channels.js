@@ -86,8 +86,7 @@ function channels_main() {
 
 
     var channel_sync_button2 = button_maker2("Trusted channel sync", function(){
-        channel_manager = {};
-
+          channel_manager = {};
         variable_public_get(["pubkey"], function(pubkey) {
             spk_object.pull_channel_state(function() {
 		refresh_channels_interfaces(pubkey, function() {
@@ -216,7 +215,7 @@ if (JSON.stringify(channel_manager) == "{}"){
 
     var bet_update_button = button_maker2("check if any bets have been settled", function() {});
     var combine_cancel_button = button_maker2("combine bets in opposite directions to recover the money from the market ", function() {});
-    var list_bets_button = button_maker2("Check positions ", bets_object.main);
+    var list_bets_button = button_maker2("Calculate positions (takes some time) ", bets_object.main);
     var close_channel_button = button_maker2("Close channel", function(){ return; });
 
     var lightning_button = button_maker2("lightning spend", function(){ return; });
@@ -334,6 +333,7 @@ if (JSON.stringify(channel_manager) == "{}"){
         console.log("refresh channels interfaces");
         variable_public_get(["time_value"], function(x) {
             tv = x;
+            console.log("refresh_channels_interfaces2 pubkey: " + pubkey);
             refresh_channels_interfaces2(pubkey, callback);
         });
     }
@@ -447,7 +447,7 @@ function returnTrueFalse(_bool2) {
 
 //            append_children(div, [long_button,short_button, br(), price_info, price,br(),trade_type_info, trade_type, br(),trade_amount_info, trade_amount, br(), oid_info, oid, button, br(), bet_update_button, br(), br(), combine_cancel_button, br(), br(), list_bets_button, br(), bets_div,close_channel_button, br(), balance_div, channel_balance_button]);
 
-            append_children(div, [long_button,short_button,br(), br(),longshort_info, br(), br(), price_info, price, br(),trade_amount_info, trade_amount, br(), trade_type_info, trade_type, br(), marginrequirement, br(),capitalconstraint, br(), button, calcleverage,calccapitalconstraint, br(), br(), bets_div, br(), balance_div, br(), channel_balance_button,list_bets_button,br(),br(),close_channel_button]);
+            append_children(div, [long_button,short_button,br(), br(),longshort_info, br(), br(), price_info, price, br(),trade_amount_info, trade_amount, br(), trade_type_info, trade_type, br(), marginrequirement, br(),capitalconstraint, br(), button, calcleverage,calccapitalconstraint, br(), br(), bets_div, br(), balance_div, br(), channel_balance_button,list_bets_button, br(),br(),close_channel_button]);
 
             lightning_button.onclick = function() { lightning_spend(pubkey); };
             channel_balance_button.onclick = function() {refresh_balance(pubkey);};
@@ -634,7 +634,11 @@ function returnTrueFalse(_bool2) {
         write(server_pubkey, cd);
         trade_amount.value = "";
         channel_warning();
-        populateStorage();
+
+
+  //      populateStorage();
+
+        console.log("CHANNEL MANAGER: " + JSON.stringify(channel_manager));
     }
 
     //Controller
@@ -649,14 +653,16 @@ function returnTrueFalse(_bool2) {
         var acc2 = pubkey;
         //let the server choose an unused cid for us.
 
-        console.log('failure');
+        console.log('getting new channel transaction');
+        console.log("getting channel pubkey: " + pubkey);
+//        console.log()
         variable_public_get(["new_channel_tx", acc1, pubkey, amount, bal2,delay, fee], function(x) { make_channel_func2(x, amount, bal2, acc1, acc2, delay, expiration, pubkey); } );
-        console.log('failure2');
+    //    console.log('failure2');
 
     }
     function make_channel_func2(tx, amount, bal2, acc1, acc2, delay, expiration, pubkey) {
         //ask a server to make the tx for us, then check that all our data matches.
-        //console.log("make channel tx is ");
+        console.log("making channel tx");
         //console.log(tx);
         var amount0 = tx[5];
         var bal20 = tx[6];
@@ -677,6 +683,7 @@ function returnTrueFalse(_bool2) {
             var spk = ["spk", acc1, acc2, [-6], 0, 0, cid, spk_amount, 0, delay];
             var stx = keys.sign(tx);
             var sspk = keys.sign(spk);
+            console.log("new channel");
             variable_public_get(["new_channel", stx, sspk, expiration], function(x) { return channels3(x, expiration, pubkey, spk, tx) });
         }
     }
@@ -711,8 +718,8 @@ function returnTrueFalse(_bool2) {
         var cd = new_cd(spk, s2spk, [], [], expiration, cid);
         write(acc2, cd);
         channel_warning();
-        populateStorage();
         refresh_channels_interfaces(pubkey);
+        populateStorage();
 
     }
 

@@ -29,15 +29,32 @@ function bets_main() {
             return ((_input / 100) * Number(upperlimit));
     }
     function main() {
+
+      spk_object.pull_channel_state(function() {
         variable_public_get(["pubkey"], outstanding_bets3);
+      });
+      console.log("done with channel state pull");
     }
+
+
     function outstanding_bets3(server_pubkey) {
+
+
+//      spk_object.pull_channel_state(function() {
+//    //      channels_object.loadchannelsreturn2;//it seems excessive to re-draw all this stuff every time the button is clicked.
+//      });
+
         var x = channels_object.read(server_pubkey);
-	console.log("outstanding bets channel object bets are ");
+
+  console.log("server pubkey is here: "+ server_pubkey);
+  console.log("outstanding bets channel object bets are ");
 	console.log(JSON.stringify(x.me[3].length));
 	console.log(JSON.stringify(x.me[3]));
         var bets = x.me[3];
         var ssme = x.ssme;
+
+  console.log("this is ssme: " + ssme);
+
         div.innerHTML = "";
         oadiv.innerHTML = "";
         var cancel_buttons = [];
@@ -61,6 +78,8 @@ function bets_main() {
             console.log("making cancel orders button, ssme is");
             console.log(JSON.stringify(ssme));
             if ( JSON.stringify(ssme[i-1].code) == JSON.stringify([0,0,0,0,4]) ) {
+
+
                 console.log("unmatched");
                 console.log(JSON.stringify([i, oid, amount, "unmatched", bet[4]]));
 //                order.innerHTML = "in market ".concat(oid).concat(" you have an open order to trade this many tokens ").concat(s2c(amount)).concat(", you are trading at this price: ").concat(parseFloat(((bet[4][2])/100), 10)).concat(", you are betting on outcome: ").concat(outcome);
@@ -119,6 +138,16 @@ console.log(s2c(amount));
 
             })(i);
         }
+
+        console.log("restarting automatic header pull");
+
+
+        myInterval = window.setInterval(function() {
+            headers_object.gimmeheaders();
+            //console.log("testing");
+        }, 5000);
+
+          channels_object.popStorage();
     }
 
 function directionize(_bool){
@@ -134,8 +163,17 @@ function directionize(_bool){
         var oldCD = channels_object.read(server_pubkey);
         var spk = oldCD.me;
         var ss = oldCD.ssme[n-2];
+
+
+        console.log(spk[3]);
+        console.log(spk[3][n]);
+
+
+        console.log(ss[n-2]);
+
+
         //var sscode = ss[1];
-        console.log("oldCD ssme, n");
+        console.log("oldCD ssme, n equals" + n);
         console.log(JSON.stringify([oldCD.ssme, n]));
         console.log("cancel trade ss is");
         console.log(JSON.stringify(ss));
@@ -146,9 +184,11 @@ function directionize(_bool){
             var msg = ["cancel_trade", keys.pub(), n, sspk2];
             variable_public_get(msg, function(x) {
                 return cancel_trade2(x, sspk2, server_pubkey, n-2);
+                console.log("this is n before else: " + n);
             });
         } else {
             console.log(ss);
+            console.log("this is n:" + n);
             console.log("this trade has already been partially or fully matched. it cannot be canceled now.");
         }
 
@@ -195,8 +235,10 @@ function directionize(_bool){
         cd.ssthem = remove_nth(n, cd.ssthem);
         channels_object.write(server_pubkey, cd);
 
-        channels_object.popStorage();
         main();
+
+        channels_object.popStorage();
+
     }
     function remove_nth(n, a) {
         var b = a.slice(0, n);

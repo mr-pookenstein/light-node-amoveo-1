@@ -229,7 +229,7 @@ console.log(JSON.stringify([
             } else {
 		console.log("long delay, do not close the trade.");
 	    }
-            return spk_force_update22(bets, ss, height, amount, nonce, new_bets, newss, fun_limit, var_limit, bet_gas_limit, i-1, callback); 
+            return spk_force_update22(bets, ss, height, amount, nonce, new_bets, newss, fun_limit, var_limit, bet_gas_limit, i-1, callback);
         });
     }
     function ss_to_internal(ess) {
@@ -281,7 +281,7 @@ console.log(JSON.stringify([
                         channels_object.write(from, newcd);
 			ss4_text = document.createElement("h8");
 			ss4_text.innerHTML = JSON.stringify(ss4);
-			document.body.append(ss4_text);
+	//		document.body.append(ss4_text);
 			//append ss4 to the document somewhere.
                         return callback(ret);
                     } else {
@@ -487,6 +487,12 @@ console.log(JSON.stringify([
     }
     function pull_channel_state(callback) {
         //get their pubkey
+
+        console.log("Clearing intervals");
+
+        clearInterval(myInterval);
+
+
         variable_public_get(["pubkey"], function(server_pubkey) {
             variable_public_get(["spk", keys.pub()], function(spk_return) {
                 var cd = spk_return[1];
@@ -505,7 +511,15 @@ console.log(JSON.stringify([
 		    var cid = spk[6];
 		    var NewCD = channels_object.new_cd(spk, them_spk, ss, ss, expiration, cid);
 		    channels_object.write(server_pubkey, NewCD);
+
+        console.log("restarting header pull after trusted channel sync");
+        myInterval = window.setInterval(function() {
+            headers_object.gimmeheaders();
+            //console.log("testing");
+        }, 5000);
 		    return callback();
+
+
                 }
 		console.log("cd0 is ");
 		console.log(JSON.stringify(cd0));
@@ -529,7 +543,7 @@ console.log(JSON.stringify([
 				var msg3 = ["channel_sync", keys.pub(), ret2];
 				setTimeout(function(){ variable_public_get(msg3, function(foo) {}); }, 2000);
 				//variable_public_get(msg3, function(foo) {});
-				
+
 				return callback();
 			    });
 			}, 2000);
@@ -539,6 +553,9 @@ console.log(JSON.stringify([
                 });
             });
         });
+
+
+
     }
     function api_bet_unlock(server_pubkey, callback) {
 	//The javascript version can be much simpler than the erlang version, because each secret is only for one smart contract for us. We don't have to search for other contracts that use it.
@@ -568,7 +585,7 @@ console.log(JSON.stringify([
 	*/
 	console.log("channel feeder bets unlock ");
 	console.log(JSON.stringify(cd));
-	    
+
         spk_bet_unlock(cd.me, cd.ssme, function(unlock_object) {
 	    console.log("spk object bets are ");
 	    console.log(JSON.stringify(unlock_object.spk[3]));
@@ -668,7 +685,7 @@ console.log(JSON.stringify([
         var ssthem = [];
 	var i = ssold.length;
         var key, bet, f, ss, key_junk;
-	
+
 	return bet_unlock2(callback);
 
 
@@ -771,7 +788,7 @@ console.log(JSON.stringify([
 			{error, E2} ->
 			    io:fwrite("bet unlock2 ERROR"),
 			    bet_unlock2(T, [Bet|B], A, SSIn, [SS|SSOut], Secrets, Nonce, [SS|SSThem]);
-			Z -> 
+			Z ->
 			    bet_unlock3(Z, T, B, A, Bet, SSIn, SSOut, SS, Secrets, Nonce, SSThem)
 		    end;
 		*/
@@ -793,12 +810,12 @@ Bets = SPK#spk.bets,
 bet_unlock2([], B, A, [], SS, Secrets, Nonce, SSThem) ->
     {B, A, SS, Secrets, Nonce, lists:reverse(SSThem)};
 bet_unlock2([Bet|T], B, A, [SS|SSIn], SSOut, Secrets, Nonce, SSThem) ->
-    Key = Bet#bet.key, 
+    Key = Bet#bet.key,
     case secrets:read(Key) of
-	<<"none">> -> 
+	<<"none">> ->
             io:fwrite("no secret known\n"),
 	    bet_unlock2(T, [Bet|B], A, SSIn, [SS|SSOut], Secrets, Nonce, [SS|SSThem]);
-	{SS2, Amount} -> 
+	{SS2, Amount} ->
 	    %Just because a bet is removed doesn't mean all the money was transfered. We should calculate how much of the money was transfered.
             io:fwrite("we have a secret\n"),
             TP = tx_pool:get(),
@@ -816,7 +833,7 @@ bet_unlock2([Bet|T], B, A, [SS|SSIn], SSOut, Secrets, Nonce, SSThem) ->
 	    Data2 = chalang:run5(SS2#ss.code, Data),
 	    Data3 = chalang:run5(Code, Data2),
 	    case Data3 of
-		{error, _E} -> 
+		{error, _E} ->
 		    io:fwrite("spk bet unlock, ss doesn't work\n"),
 		    io:fwrite(packer:pack(SS2)),
 		    io:fwrite("\n"),
@@ -828,10 +845,10 @@ bet_unlock2([Bet|T], B, A, [SS|SSIn], SSOut, Secrets, Nonce, SSThem) ->
 			{error, E2} ->
 			    io:fwrite("bet unlock2 ERROR"),
 			    bet_unlock2(T, [Bet|B], A, SSIn, [SS|SSOut], Secrets, Nonce, [SS|SSThem]);
-			Z -> 
+			Z ->
 			    bet_unlock3(Z, T, B, A, Bet, SSIn, SSOut, SS, Secrets, Nonce, SSThem)
 		    end;
-		X -> 
+		X ->
                     if
                         is_integer(Amount) ->
                             true = (abs(Amount) == abs(Bet#bet.amount));
@@ -849,12 +866,12 @@ bet_unlock3(Data5, T, B, A, Bet, SSIn, SSOut, SS2, Secrets, Nonce, SSThem) ->
 	   io:fwrite(integer_to_list(Delay)),
 	   io:fwrite("delay >0, keep the bet.\n"),
 	   bet_unlock2(T, [Bet|B], A, SSIn, [SS2|SSOut], Secrets, Nonce, [SS2|SSThem]);
-       true -> 
+       true ->
 	   io:fwrite("delay <1, remove it.\n"),
 	   CGran = constants:channel_granularity(),
 	   true = ContractAmount =< CGran,
 	   A3 = ContractAmount * Bet#bet.amount div CGran,
-	   Key = Bet#bet.key, 
+	   Key = Bet#bet.key,
 	   bet_unlock2(T, B, A+A3, SSIn, SSOut, [{secret, SS2, Key}|Secrets], Nonce + Nonce2, [SS2|SSThem])
    end.
     */

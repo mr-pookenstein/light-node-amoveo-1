@@ -152,6 +152,21 @@ function keys_function1() {
     }
     function save_keys() {
         download(keys_internal.getPrivate("hex"), "Amoveo Key", "text/plain");
+
+        load_text.style.display = "initial";
+        file_selector.style.display = "intitial";
+
+
+        load_text.style.display = "block";
+        file_selector.style.display = "block";
+
+
+        load_text.style.display = "unset";
+        file_selector.style.display = "unset";
+
+
+              load_text.style.display = "none";
+              file_selector.style.display = "none";
 	update_pubkey();
     }
     function load_keys() {
@@ -181,7 +196,7 @@ function keys_function1() {
 
             load_text.style.display = "none";
             file_selector.style.display = "none";
-
+              //disabling for now
             return channels_object.loadchannelslocal_final(pubkey_64);
 
       //      return channels_object.loadchannelsreturn2(pubkey_64);

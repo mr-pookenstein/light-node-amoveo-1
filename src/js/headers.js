@@ -1,3 +1,11 @@
+
+//var myInterval = window.setInterval(function() {
+//    headers_object.gimmeheaders;
+//}, 5000);
+
+
+
+
 function headers_main() {
   //   var mode = "production";
     //var mode = "test";
@@ -392,8 +400,9 @@ function headers_main() {
 
 //    window.setInterval(more_headers(),10000);
 //    window.setinterval(console.log('adfas'),10000);
+window.myInterval = "global";
 
-window.setInterval(function() {
+myInterval = window.setInterval(function() {
     more_headers.call();
 }, 5000);
 
@@ -452,6 +461,7 @@ console.log(upperlimit);
         console.log(int2sci(2000));//should be 2804
         console.log(sci2int(int2sci(2000)));// should be 2000
     }
-    return {sci2int: sci2int, serialize: serialize_header, top: (function() { return top_header; }), db: headers_db, read_ewah: read_ewah};
+    return {sci2int: sci2int, serialize: serialize_header, top: (function() { return top_header; }), db: headers_db, read_ewah: read_ewah
+    , gimmeheaders: (function() { return more_headers(); })};
 }
 var headers_object = headers_main();
